@@ -31,7 +31,20 @@ To install the backend service, follow these steps:
     pip install -r requirements.txt
     ```
 
-4. Set up environment variables:
+4. Create an RDS Postgres instance:
+- Go to the AWS Management Console.
+- Navigate to RDS and create a new Postgres instance.
+- Note down the endpoint, username, and password for the database.
+
+5. Create a Security Group to allow inbound and outbound traffic to the RDS instance:
+    - Go to the AWS Management Console.
+    - Navigate to EC2 and create a new Security Group.
+    - Add inbound rules to allow traffic on the port your Postgres instance is using (default is 5432).
+    - Attach this Security Group to your RDS instance.
+
+## Usage
+
+6. Set up environment variables:
     Create a `.env` file in the `backend` directory and add the necessary environment variables. Refer to `.env.example` for the required variables.
 
     Example `.env` file:
@@ -43,17 +56,6 @@ To install the backend service, follow these steps:
     JWT_SECRET_KEY=your_jwt_secret_key
     SHODAN_API_KEY=your_shodan_api_key
     ```
-
-5. Create an RDS Postgres instance:
-    - Go to the AWS Management Console.
-    - Navigate to RDS and create a new Postgres instance.
-    - Note down the endpoint, username, and password for the database.
-
-6. Create a Security Group to allow inbound and outbound traffic to the RDS instance:
-    - Go to the AWS Management Console.
-    - Navigate to EC2 and create a new Security Group.
-    - Add inbound rules to allow traffic on the port your Postgres instance is using (default is 5432).
-    - Attach this Security Group to your RDS instance.
 
 7. Start the development server:
     ```bash
