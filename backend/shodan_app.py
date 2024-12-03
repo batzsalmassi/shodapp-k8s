@@ -31,20 +31,51 @@ app = Flask(__name__)
 # Enable CORS for all routes with support for Authorization header
 CORS(app, resources={r"/*": {"origins": "*", "allow_headers": ["Content-Type", "Authorization"]}})
 
+def read_secret(secret_path):
+    try:
+        with open(secret_path, 'r') as file:
+            return file.read().strip()
+    except Exception as e:
+        logger.error(f"Failed to read secret {secret_path}: {str(e)}")
+        raise
+
+# Mask sensitive information
+def mask_secret(secret, show_last=4):
+    return '*' * (len(secret) - show_last) + secret[-show_last:]
+
 # Database Configuration
 db_user = os.getenv('DB_USER')
 db_password = os.getenv('DB_PASSWORD')
 db_host = os.getenv('DB_HOST')
 db_name = os.getenv('DB_NAME', 'postgres')
 
+# Fallback to reading secrets if environment variables are paths
+if db_user and os.path.exists(db_user):
+    db_user = read_secret(db_user)
+if db_password and os.path.exists(db_password):
+    db_password = read_secret(db_password)
+if db_host and os.path.exists(db_host):
+    db_host = read_secret(db_host)
+if db_name and os.path.exists(db_name):
+    db_name = read_secret(db_name)
+
 # Validate database configuration
 if not all([db_user, db_password, db_host]):
     logger.error("Missing required database configuration")
     raise ValueError("Missing required database configuration. Check your .env file.")
 
+# Log the database configuration for debugging
+logger.debug(f"DB_USER: {mask_secret(db_user)}")
+logger.debug(f"DB_PASSWORD: {mask_secret(db_password)}")
+logger.debug(f"DB_HOST: {mask_secret(db_host)}")
+logger.debug(f"DB_NAME: {db_name}")
+
 try:
     # Construct database URL
     DATABASE_URL = f"postgresql://{db_user}:{db_password}@{db_host}:5432/{db_name}"
+    # Log the constructed database URL
+    masked_db_url = f"postgresql://{mask_secret(db_user)}:{mask_secret(db_password)}@{mask_secret(db_host)}:5432/{db_name}"
+    logger.debug(f"Constructed DATABASE_URL: {masked_db_url}")
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {

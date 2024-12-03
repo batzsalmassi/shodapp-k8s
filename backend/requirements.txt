@@ -7,3 +7,4 @@ flask-jwt-extended
 bcrypt
 python-dotenv
 psycopg2-binary
+prometheus_client
