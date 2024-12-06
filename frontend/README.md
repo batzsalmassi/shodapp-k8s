@@ -6,7 +6,7 @@ This is the frontend application for the Shodapp project. It is built using mode
 ## Installation
 To install the dependencies, run the following command:
 
-npm install
+### `npm install`
 
 ## Available Scripts
 
