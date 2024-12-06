@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: seansal/shodan-k8s-frontend:latest
+    ports:
+      - "3000:3000"
+    environment:
+      #- REACT_APP_API_URL=http://localhost:5055
+      - WATCHPACK_POLLING=true
+      - WDS_SOCKET_PORT=0
+    depends_on:
+      - backend
+
+  backend:
+    image: seansal/shodan-k8s-backend:latest
+    ports:
+      - "5055:5055"
+    environment:
+      - DB_USER=/run/secrets/db_user
+      - DB_PASSWORD=/run/secrets/db_password
+      - DB_HOST=/run/secrets/db_host
+      - DB_NAME=/run/secrets/db_name
+      - JWT_SECRET_KEY=/run/secrets/jwt_secret_key
+      - SHODAN_API_KEY=/run/secrets/shodan_api_key
+    secrets:
+      - db_user
+      - db_password
+      - jwt_secret_key
+      - shodan_api_key
+      - db_host
+      - db_name
+
+networks:
+  default:
+    driver: bridge
+
+secrets:
+  db_user:
+    file: ./secrets/db_user.txt
+  db_password:
+    file: ./secrets/db_password.txt
+  jwt_secret_key:
+    file: ./secrets/jwt_secret_key.txt
+  shodan_api_key:
+    file: ./secrets/shodan_api_key.txt
+  db_host:
+    file: ./secrets/db_host.txt
+  db_name:
+    file: ./secrets/db_name.txt
