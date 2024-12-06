@@ -27,6 +27,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Set logging level for urllib3 to WARNING to suppress debug logs
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
 app = Flask(__name__)
 # Enable CORS for all routes with support for Authorization header
 CORS(app, resources={r"/*": {"origins": "*", "allow_headers": ["Content-Type", "Authorization"]}})
@@ -110,8 +113,13 @@ jwt = JWTManager(app)
 
 # Load the Shodan API key from environment variables
 shodan_secret = os.getenv('SHODAN_API_KEY')
+if shodan_secret and os.path.exists(shodan_secret):
+    shodan_secret = read_secret(shodan_secret)
 if not shodan_secret:
     raise ValueError("No SHODAN_API_KEY found in environment variables.")
+
+# Log the Shodan API key for debugging (masked for security)
+logger.debug(f"Shodan API Key: {mask_secret(shodan_secret)}")
 
 api = shodan.Shodan(shodan_secret)
 
@@ -138,7 +146,7 @@ def jwt_required():
                 verify_jwt_in_request()
                 current_user_id = get_jwt_identity()
                 user_id = int(current_user_id)
-                user = User.query.get(user_id)
+                user = db.session.get(User, user_id)  # Updated to use Session.get()
                 if not user:
                     return jsonify({"error": "User not found"}), 401
                 return fn(*args, **kwargs)
@@ -238,7 +246,7 @@ def login():
 def perform_ip_search():
     current_user_id = get_jwt_identity()
     try:
-        user = User.query.get(int(current_user_id))
+        user = db.session.get(User, int(current_user_id))  # Updated to use Session.get()
         if not user:
             return jsonify({'error': 'User not found'}), 401
 
@@ -267,7 +275,7 @@ def perform_ip_search():
 def perform_filter_search():
     current_user_id = get_jwt_identity()
     try:
-        user = User.query.get(int(current_user_id))
+        user = db.session.get(User, int(current_user_id))  # Updated to use Session.get()
         if not user:
             return jsonify({'error': 'User not found'}), 401
 
