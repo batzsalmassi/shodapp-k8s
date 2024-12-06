@@ -1,6 +1,12 @@
-# Getting Started with Create React App
+# Frontend Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Project Description
+This is the frontend application for the Shodapp project. It is built using modern web technologies to provide a seamless user experience.
+
+## Installation
+To install the dependencies, run the following command:
+
+npm install
 
 ## Available Scripts
 
