@@ -60,6 +60,7 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+/terraform/.terraform*
 
 /backend/.env
 /backend/app.log
