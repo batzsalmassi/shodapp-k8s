@@ -63,3 +63,4 @@ terraform.rc
 
 /backend/.env
 /backend/app.log
+/docker-compse/secrets/
