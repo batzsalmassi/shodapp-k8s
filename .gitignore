@@ -61,6 +61,7 @@ override.tf.json
 .terraformrc
 terraform.rc
 /terraform/.terraform*
+/terraform/backend.tf
 
 /backend/.env
 /backend/app.log
