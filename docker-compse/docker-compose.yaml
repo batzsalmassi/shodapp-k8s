@@ -2,11 +2,11 @@ version: '3.8'
 
 services:
   frontend:
-    image: seansal/shodan-k8s-frontend:latest
+    image: seansal/shodapp-k8s-frontend:latest
     ports:
       - "3000:3000"
     environment:
-      #- REACT_APP_API_URL=http://localhost:5055
+      - REACT_APP_API_URL=http://localhost:5055
       - WATCHPACK_POLLING=true
       - WDS_SOCKET_PORT=0
     depends_on:
