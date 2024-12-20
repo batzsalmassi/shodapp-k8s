@@ -2,26 +2,45 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const AuthContext = createContext(null);
+const API_URL = process.env.REACT_APP_API_URL;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on mount
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
-    const email = localStorage.getItem('email');
-    
-    if (token && userId && email) {
-      setUser({ token, id: userId, email });
-    }
-    setLoading(false);
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      const email = localStorage.getItem('email');
+      
+      if (token && userId && email) {
+        try {
+          const response = await fetch(`${API_URL}/check_auth`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error('Token validation failed');
+          }
+
+          setUser({ token, id: userId, email });
+        } catch (error) {
+          logout();
+        }
+      }
+      setLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (email, password) => {
     try {
-      const response = await fetch('http://localhost:5055/login', {
+      const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -29,27 +48,26 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Login failed');
+        throw new Error(data.message || 'Login failed');
       }
 
-      const data = await response.json();
-      
-      // Store all user data
       localStorage.setItem('token', data.token);
       localStorage.setItem('userId', data.user_id);
       localStorage.setItem('email', data.email);
-      
+
       setUser({
         token: data.token,
         id: data.user_id,
-        email: data.email
+        email: data.email,
       });
-      
+
       return true;
     } catch (error) {
       console.error('Login error:', error);
-      return false;
+      throw new Error(error.message || 'Failed to login');
     }
   };
 
@@ -62,7 +80,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (email, password) => {
     try {
-      const response = await fetch('http://localhost:5055/register', {
+      const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,19 +88,60 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Registration failed');
+        throw new Error(data.message || 'Registration failed');
       }
 
       return true;
     } catch (error) {
       console.error('Registration error:', error);
+      throw new Error(error.message || 'Failed to register');
+    }
+  };
+
+  const checkAuthStatus = async () => {
+    try {
+      if (!user?.token) {
+        return false;
+      }
+
+      const response = await fetch(`${API_URL}/check_auth`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Auth check failed');
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Auth check error:', error);
       return false;
     }
   };
 
+  const updateToken = (newToken) => {
+    if (newToken) {
+      localStorage.setItem('token', newToken);
+      setUser(prev => prev ? { ...prev, token: newToken } : null);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, loading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      logout, 
+      register, 
+      loading,
+      checkAuthStatus,
+      updateToken
+    }}>
       {children}
     </AuthContext.Provider>
   );

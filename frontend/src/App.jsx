@@ -1,6 +1,6 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Shield, Search, Globe, Terminal, Activity, LogOut } from 'lucide-react';
+//import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { Shield, Search, Globe, Terminal, Activity, LogOut, Loader } from 'lucide-react';
 import SearchByIP from './components/SearchByIP';
 import SearchByFilters from './components/SearchByFilters';
 import HostResults from './components/HostResults';
@@ -12,6 +12,16 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 const NavigationBar = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   return (
     <nav className="bg-gray-800 border-b border-cyan-500/30 shadow-lg shadow-cyan-500/20">
@@ -35,7 +45,7 @@ const NavigationBar = () => {
                 <span>Advanced Search</span>
               </Link>
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 className="text-red-400 hover:text-red-300 transition-colors flex items-center space-x-2"
               >
                 <LogOut className="w-4 h-4" />
@@ -62,7 +72,15 @@ const NavigationBar = () => {
 };
 
 const HomePage = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[80vh]">
+        <Loader className="w-8 h-8 text-cyan-400 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-12">
@@ -138,7 +156,7 @@ const App = () => {
       <Router>
         <div className="min-h-screen bg-gray-900 text-gray-100">
           <NavigationBar />
-
+          
           <main className="container mx-auto p-6">
             <Routes>
               <Route path="/" element={<HomePage />} />

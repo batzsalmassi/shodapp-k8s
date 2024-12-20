@@ -13,7 +13,6 @@ ENV CHOKIDAR_USEPOLLING=true
 
 # Environment variable for backend URL
 # Note: This will be overridden by docker-compose environment settings
-#ENV REACT_APP_API_URL=http://localhost:5055
 
 # Install development tools
 RUN apt-get update && \
