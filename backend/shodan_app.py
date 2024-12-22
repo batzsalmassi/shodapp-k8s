@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 # Enable CORS for all routes with support for Authorization header
 CORS(app, resources={r"/*": {"origins": "*", "allow_headers": ["Content-Type", "Authorization"]}})
 
@@ -196,7 +197,7 @@ def initialize_database():
         return False
 
 # Authentication routes
-@app.route('/register', methods=['POST'])
+@app.route('/api/register', methods=['POST'])
 @handle_db_error
 def register():
     data = request.get_json()
@@ -221,7 +222,7 @@ def register():
         logger.error(f"Registration error: {str(e)}")
         return jsonify({'error': 'Registration failed'}), 500
 
-@app.route('/login', methods=['POST'])
+@app.route('/api/login', methods=['POST'])
 @handle_db_error
 def login():
     data = request.get_json()
@@ -241,7 +242,7 @@ def login():
     
     return jsonify({'error': 'Invalid credentials'}), 401
 
-@app.route('/perform_ip_search', methods=['POST'])
+@app.route('/api/perform_ip_search', methods=['POST'])
 @jwt_required()
 def perform_ip_search():
     current_user_id = get_jwt_identity()
@@ -270,7 +271,7 @@ def perform_ip_search():
         logger.error(f"Unexpected Error in IP search: {str(e)}")
         return jsonify({'error': "An unexpected error occurred"}), 500
 
-@app.route('/perform_filter_search', methods=['POST'])
+@app.route('/api/perform_filter_search', methods=['POST'])
 @jwt_required()
 def perform_filter_search():
     current_user_id = get_jwt_identity()
@@ -340,7 +341,7 @@ def perform_filter_search():
         logger.error(f"Unexpected Error in filter search: {str(e)}")
         return jsonify({'error': "An unexpected error occurred"}), 500
 
-@app.route('/check_auth', methods=['GET'])
+@app.route('/api/check_auth', methods=['GET'])
 @jwt_required()
 def check_auth():
     current_user_id = get_jwt_identity()
@@ -356,7 +357,7 @@ def check_auth():
         logger.error(f"Auth check error: {str(e)}")
     return jsonify({'authenticated': False}), 401
 
-@app.route('/test-db', methods=['GET'])
+@app.route('/api/test-db', methods=['GET'])
 def test_db():
     try:
         if test_database_connection():
@@ -365,6 +366,10 @@ def test_db():
     except Exception as e:
         logger.error(f"Database test failed: {str(e)}")
         return jsonify({'error': f'Database connection failed: {str(e)}'}), 500
+
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'healthy'}), 200
 
 if __name__ == "__main__":
     try:
