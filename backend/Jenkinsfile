@@ -17,20 +17,6 @@ pipeline {
         }
 
 
-    stages {
-        stage('Checkout Backend') {
-            steps {
-                checkout([$class: 'GitSCM',
-                    branches: [[name: '*/main']],
-                    extensions: [[
-                        $class: 'SparseCheckoutPaths',
-                        sparseCheckoutPaths: [[path: 'backend/']]
-                    ]],
-                    userRemoteConfigs: [[url: 'https://github.com/batzsalmassi/shodapp-k8s.git']]
-                ])
-            }
-        }
-
         stage('Run Tests') {
             steps {
                 dir('backend') {
