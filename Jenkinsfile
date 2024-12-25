@@ -62,7 +62,14 @@ pipeline {
 
     post {
         always {
-            
+            cleanWs()
+            sh 'docker logout'
+        }
+        success {
+            echo 'Pipeline completed successfully'
+        }
+        failure {
+            echo 'Pipeline failed'
         }
     }
 }
