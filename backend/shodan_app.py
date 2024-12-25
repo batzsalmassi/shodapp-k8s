@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response, g
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, verify_jwt_in_request
@@ -12,6 +12,9 @@ from dotenv import load_dotenv
 from sqlalchemy.exc import SQLAlchemyError, OperationalError
 import sys
 from sqlalchemy import text
+import psutil
+from prometheus_client import start_http_server, Counter, Gauge, generate_latest, Histogram
+import time
 
 # Load environment variables from .env file
 load_dotenv()
@@ -34,6 +37,39 @@ app = Flask(__name__)
 app.url_map.strict_slashes = False
 # Enable CORS for all routes with support for Authorization header
 CORS(app, resources={r"/*": {"origins": "*", "allow_headers": ["Content-Type", "Authorization"]}})
+
+# Prometheus metrics
+SITE_VISITS = Counter('site_visits', 'Number of visits to the Blackjack site')
+
+# System metrics
+CPU_USAGE = Gauge('cpu_usage_percent', 'Current CPU usage in percent')
+MEMORY_USAGE = Gauge('memory_usage_bytes', 'Current memory usage in bytes')
+NETWORK_IO_COUNTERS = Gauge('network_io_bytes', 'Network I/O counters', ['direction'])
+
+# HTTP metrics
+HTTP_REQUESTS = Counter('http_requests_total', 'Total number of HTTP requests', ['method', 'endpoint', 'status_code'])
+HTTP_REQUEST_DURATION = Histogram('http_request_duration_seconds', 'Histogram of HTTP request durations',
+                                  ['method', 'endpoint'])
+
+
+# Before and after request hooks to track request durations and counts
+@app.before_request
+def track_request_start():
+    # Record the start time of the request
+    g.start_time = time.time()
+
+
+@app.after_request
+def track_request_end(response):
+    # Measure request duration
+    if hasattr(g, 'start_time'):
+        request_duration = time.time() - g.start_time
+        HTTP_REQUEST_DURATION.labels(method=request.method, endpoint=request.path).observe(request_duration)
+
+    # Count the request
+    HTTP_REQUESTS.labels(method=request.method, endpoint=request.path, status_code=response.status_code).inc()
+
+    return response
 
 def read_secret(secret_path):
     try:
@@ -370,6 +406,18 @@ def test_db():
 @app.route('/api/health', methods=['GET'])
 def health_check():
     return jsonify({'status': 'healthy'}), 200
+
+@app.route('/api/metrics')
+def metrics():
+    # Update system metrics before serving
+    CPU_USAGE.set(psutil.cpu_percent())
+    MEMORY_USAGE.set(psutil.virtual_memory().used)
+    net_io = psutil.net_io_counters()
+    NETWORK_IO_COUNTERS.labels('in').set(net_io.bytes_recv)
+    NETWORK_IO_COUNTERS.labels('out').set(net_io.bytes_sent)
+
+    # Return Prometheus metrics in the required format
+    return Response(generate_latest(), mimetype='text/plain')
 
 if __name__ == "__main__":
     try:
