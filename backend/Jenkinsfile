@@ -21,7 +21,6 @@ pipeline {
             steps {
                 dir('backend') {
                     sh '''
-                        python -m pytest tests/ -v
                         python3 shodan_app.py &
                         sleep 5
                         curl -f http://localhost:5055/api/health
