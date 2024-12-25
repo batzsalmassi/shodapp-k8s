@@ -16,33 +16,31 @@ pipeline {
             }
         }
 
-        stage('Check for Backend Changes') {
+
+    stages {
+        stage('Checkout Backend') {
             steps {
-                script {
-                    sh 'git fetch --unshallow || true'
-                    def changes = sh(script: 'git diff --name-only HEAD~1 HEAD', returnStdout: true).trim()
-                    if (changes.isEmpty()) {
-                        currentBuild.result = 'SUCCESS'
-                        error('No changes detected. Skipping pipeline.')
-                    }
-                }
+                checkout([$class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    extensions: [[
+                        $class: 'SparseCheckoutPaths',
+                        sparseCheckoutPaths: [[path: 'backend/']]
+                    ]],
+                    userRemoteConfigs: [[url: 'https://github.com/batzsalmassi/shodapp-k8s.git']]
+                ])
             }
         }
 
-        stage('Run Application Tests') {
+        stage('Run Tests') {
             steps {
                 dir('backend') {
-                    script {
-                        sh '''
-                            python3 -m venv venv
-                            . venv/bin/activate
-                            pip install -r requirements.txt
-                            python3 shodan_app.py &
-                            sleep 10
-                            curl -f http://localhost:5055/test-db || (echo "App health check failed" && exit 1)
-                            pkill -f shodan_app.py
-                        '''
-                    }
+                    sh '''
+                        python -m pytest tests/ -v
+                        python3 shodan_app.py &
+                        sleep 5
+                        curl -f http://localhost:5055/api/health
+                        pkill -f shodan_app.py
+                    '''
                 }
             }
         }

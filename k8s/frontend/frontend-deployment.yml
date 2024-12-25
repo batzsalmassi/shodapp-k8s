@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shodapp-frontend-deployment
+  namespace: shodapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shodapp-frontend
+  template:
+    metadata:
+      labels:
+        app: shodapp-frontend
+    spec:
+      containers:
+        - name: shodapp-frontend
+          image: seansal/shodapp-k8s-frontend:latest
+          ports:
+            - name: http
+              containerPort: 3000
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=512"
+            - name: REACT_APP_API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: shodapp-config
+                  key: REACT_APP_API_URL
