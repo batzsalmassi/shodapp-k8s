@@ -19,6 +19,7 @@ pipeline {
         stage('Check for Backend Changes') {
             steps {
                 script {
+                    sh 'git fetch --unshallow || true'
                     def changes = sh(script: 'git diff --name-only HEAD~1 HEAD', returnStdout: true).trim()
                     if (changes.isEmpty()) {
                         currentBuild.result = 'SUCCESS'
