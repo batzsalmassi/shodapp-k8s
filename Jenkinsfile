@@ -33,10 +33,15 @@ pipeline {
             steps {
                 dir('backend') {
                     script {
-                        sh 'python3 shodan_app.py &'
-                        sh 'sleep 10'
-                        sh 'curl -f http://localhost:5055/api/health || (echo "App health check failed" && exit 1)'
-                        sh 'pkill -f shodan_app.py'
+                        sh '''
+                            python3 -m venv venv
+                            . venv/bin/activate
+                            pip install -r requirements.txt
+                            python3 shodan_app.py &
+                            sleep 10
+                            curl -f http://localhost:5055/test-db || (echo "App health check failed" && exit 1)
+                            pkill -f shodan_app.py
+                        '''
                     }
                 }
             }
