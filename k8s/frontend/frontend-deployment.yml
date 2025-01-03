@@ -16,6 +16,7 @@ spec:
       containers:
         - name: shodapp-frontend
           image: seansal/shodapp-k8s-frontend:latest
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 3000

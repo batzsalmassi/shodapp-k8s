@@ -16,6 +16,7 @@ spec:
       containers:
         - name: shodapp-backend
           image: seansal/shodan-k8s-backend:v2
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 5055
