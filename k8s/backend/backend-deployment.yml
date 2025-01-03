@@ -10,6 +10,8 @@ spec:
       name: shodapp-backend
   template:
     metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: "2025-01-02T20:00:00Z"
       labels:
         name: shodapp-backend
     spec:
