@@ -31,5 +31,14 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/shodan_app:${{ github.run_id }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/shodan_app:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/shodapp-k8s-frontend:${{ github.run_id }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/shodapp-k8s-frontend:latest
+
+      - name: Update kubernetes manifests
+        run: |
+          git pull origin main
+          timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          sed -i "s|kubectl.kubernetes.io/restartedAt: '.*'|kubectl.kubernetes.io/restartedAt: '$timestamp'|" k8s/frontend/frontend-deployment.yml
+          git add k8s/frontend/frontend-deployment.yml
+          git commit -m "Update frontend deployment timestamp for new image" || echo "No changes to commit"
+          git push origin main
