@@ -11,9 +11,6 @@ ENV CI=true
 ENV WDS_SOCKET_PORT=0
 ENV CHOKIDAR_USEPOLLING=true
 
-# Environment variable for backend URL
-# Note: This will be overridden by docker-compose environment settings
-
 # Install development tools
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
