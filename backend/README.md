@@ -1,4 +1,4 @@
-# Backend Service
+# Backend Service App
 
 This repository contains the backend service for the Shodapp application. The backend is responsible for handling API requests, processing data, and interacting with the database.
 
