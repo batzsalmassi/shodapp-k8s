@@ -4,7 +4,7 @@ metadata:
   name: shodapp-backend-deployment
   namespace: shodapp
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       name: shodapp-backend
