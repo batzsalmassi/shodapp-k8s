@@ -4,7 +4,7 @@ metadata:
   name: shodapp-frontend-deployment
   namespace: shodapp
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: shodapp-frontend
