@@ -1,7 +1,8 @@
 # Frontend Application
 
 ## Project Description
-This is the frontend application for the Shodapp project. It is built using modern web technologies to provide a seamless user experience.
+This is the frontend application for the Shodapp project.
+It is built using modern web technologies to provide a seamless user experience.
 
 ## Installation
 To install the dependencies, run the following command:
