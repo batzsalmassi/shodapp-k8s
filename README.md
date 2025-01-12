@@ -125,6 +125,8 @@ The Kubernetes configurations for deploying the Shodapp project are located in t
     kubectl apply -k .
     ```
 
+**Note:** The `shodapp-k8s-infra` repository uses the `k8s` folder to provision the applications via ArgoCD as the GitOps tool. ArgoCD automatically deploys the application and ensures it is synced with the folder configuration.
+
 ## Contributing
 
 We welcome contributions to the Shodapp project. To contribute, follow these steps:
