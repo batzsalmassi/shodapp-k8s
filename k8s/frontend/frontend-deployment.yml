@@ -11,7 +11,7 @@ spec:
   template:
     metadata:
       annotations:
-        kubectl.kubernetes.io/restartedAt: '2025-01-03T09:53:05Z'
+        kubectl.kubernetes.io/restartedAt: '2025-01-12T15:00:05Z'
       labels:
         app: shodapp-frontend
     spec:
