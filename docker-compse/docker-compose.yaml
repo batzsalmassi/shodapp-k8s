@@ -13,7 +13,7 @@ services:
       - backend
 
   backend:
-    image: seansal/shodan-k8s-backend:v2
+    image: seansal/shodapp-k8s-backend:latest
     ports:
       - "5055:5055"
     environment:
