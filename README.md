@@ -9,6 +9,7 @@ This repository contains the Kubernetes configurations and Docker setup for the 
 - [Backend Service](#backend-service)
 - [Docker Compose Setup](#docker-compose-setup)
 - [Kubernetes Setup](#kubernetes-setup)
+- [CI Process](#ci-process)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -45,7 +46,6 @@ For more information, refer to the [frontend README](./frontend/README.md).
 
 This repository contains the backend service for the Shodapp application. The backend is responsible for handling API requests, processing data, and interacting with the database.
 **Note:** The backend application works with an online RDS, so you need an available RDS endpoint or any other available database to run the backend app.
-
 
 ### Installation
 
@@ -126,6 +126,30 @@ The Kubernetes configurations for deploying the Shodapp project are located in t
     ```
 
 **Note:** The `shodapp-k8s-infra` repository uses the `k8s` folder to provision the applications via ArgoCD as the GitOps tool. ArgoCD automatically deploys the application and ensures it is synced with the folder configuration.
+
+## CI Process
+
+The CI process for both the frontend and backend applications is managed using GitHub Actions workflows.
+
+### Frontend CI Workflow
+
+The frontend CI workflow is defined in `.github/workflows/frontend-ci-workflow.yml`. It triggers on pull request merges and manual dispatches. The workflow performs the following steps:
+
+1. Checks out the code.
+2. Sets up QEMU and Docker Buildx.
+3. Logs in to Docker Hub.
+4. Builds and pushes the Docker image for the frontend application.
+5. Updates the Kubernetes manifests with the new image.
+
+### Backend CI Workflow
+
+The backend CI workflow is defined in `.github/workflows/backend-ci-workflow.yml`. It triggers on pull request merges and manual dispatches. The workflow performs the following steps:
+
+1. Checks out the code.
+2. Sets up QEMU and Docker Buildx.
+3. Logs in to Docker Hub.
+4. Builds and pushes the Docker image for the backend application.
+5. Updates the Kubernetes manifests with the new image.
 
 ## Contributing
 
